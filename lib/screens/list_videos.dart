@@ -6,7 +6,6 @@ import 'package:academic_app/services/video_api.dart';
 import 'package:academic_app/shared/widgets/card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
 class ListVideos extends StatefulWidget {
   const ListVideos({Key? key}) : super(key: key);
@@ -18,7 +17,6 @@ class ListVideos extends StatefulWidget {
 class _ListVideosState extends State<ListVideos> {
   List<Video> listagemVideos = <Video>[];
   bool _isLoading = false;
-  bool _lazyLoading = false;
   bool _showFab = false;
   int _pageCurrent = 1;
   int _totalResults = 0;
@@ -40,17 +38,13 @@ class _ListVideosState extends State<ListVideos> {
     try {
       if (lazy != null) {
         if (_totalResults > listagemVideos.length) {
-          setState(() {
-            _pageCurrent += 1;
-            _lazyLoading = true;
-          });
+          _pageCurrent += 1;
 
           var newValues = await fetchVideos(page: _pageCurrent);
 
           setState(() {
             var newValuesList = VideoApi.getVideos(newValues);
             listagemVideos.addAll(newValuesList);
-            _lazyLoading = false;
           });
         }
       } else {
@@ -132,6 +126,8 @@ class _ListVideosState extends State<ListVideos> {
                   }),
                 );
               });
+            } else {
+              getVideos(lazy: true);
             }
           }
         });
@@ -144,6 +140,17 @@ class _ListVideosState extends State<ListVideos> {
         itemCount: listagemVideos.length,
         itemBuilder: (context, index) {
           Video video = listagemVideos[index];
+
+          if (index == listagemVideos.length - 1 &&
+              _totalResults > listagemVideos.length) {
+            return const Center(
+              child: SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
 
           return Center(
             child: Padding(
@@ -180,11 +187,7 @@ class _ListVideosState extends State<ListVideos> {
           color: Colors.deepPurple[100],
         ),
         child: !_isLoading
-            ? LazyLoadScrollView(
-                scrollDirection: Axis.vertical,
-                isLoading: _lazyLoading,
-                onEndOfPage: () => getVideos(lazy: true),
-                child: buildList())
+            ? buildList()
             : const Center(
                 child: CircularProgressIndicator(
                   color: Colors.deepPurple,
