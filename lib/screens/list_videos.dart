@@ -5,6 +5,8 @@ import 'package:academic_app/screens/player.dart';
 import 'package:academic_app/services/video_api.dart';
 import 'package:academic_app/shared/widgets/card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
 class ListVideos extends StatefulWidget {
   const ListVideos({Key? key}) : super(key: key);
@@ -15,22 +17,66 @@ class ListVideos extends StatefulWidget {
 
 class _ListVideosState extends State<ListVideos> {
   List<Video> listagemVideos = <Video>[];
+  bool _isLoading = false;
+  bool _lazyLoading = false;
+  bool _showFab = false;
+  int _pageCurrent = 1;
+  int _totalResults = 0;
+  final ScrollController _scrollController = ScrollController();
 
-  void getVideos() async {
+  Future fetchVideos({int? page}) async {
+    int newPage = page ?? 1;
+
+    var response = await VideoApi.request(
+        {'query': 'tecnology', 'page': newPage.toString()});
+
+    _totalResults = response['total_results'];
+    _pageCurrent = response['page'];
+
+    return response;
+  }
+
+  void getVideos({bool? lazy}) async {
     try {
-      Iterable response = await VideoApi.getVideos({'query': 'people'});
-      setState(() {
-        listagemVideos =
-            response.map((model) => Video.fromJson(model)).toList();
-      });
+      if (lazy != null) {
+        if (_totalResults > listagemVideos.length) {
+          setState(() {
+            _pageCurrent += 1;
+            _lazyLoading = true;
+          });
+
+          var newValues = await fetchVideos(page: _pageCurrent);
+
+          setState(() {
+            var newValuesList = VideoApi.getVideos(newValues);
+            listagemVideos.addAll(newValuesList);
+            _lazyLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          _isLoading = true;
+        });
+
+        var response = await fetchVideos();
+
+        setState(() {
+          listagemVideos = VideoApi.getVideos(response);
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       _showMyDialog(e.toString());
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   void initState() {
     getVideos();
+
     super.initState();
   }
 
@@ -62,6 +108,67 @@ class _ListVideosState extends State<ListVideos> {
     );
   }
 
+  Widget buildList() {
+    return NotificationListener<UserScrollNotification>(
+      onNotification: (notification) {
+        final ScrollDirection direction = notification.direction;
+        final metrics = notification.metrics;
+
+        setState(() {
+          if (direction == ScrollDirection.reverse) {
+            _showFab = false;
+          } else if (direction == ScrollDirection.forward) {
+            _showFab = true;
+          }
+
+          if (metrics.atEdge) {
+            bool isTop = metrics.pixels == 0;
+            if (isTop) {
+              setState(() {
+                Timer(
+                  const Duration(seconds: 1),
+                  () => setState(() {
+                    _showFab = false;
+                  }),
+                );
+              });
+            }
+          }
+        });
+
+        return true;
+      },
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(8.0),
+        itemCount: listagemVideos.length,
+        itemBuilder: (context, index) {
+          Video video = listagemVideos[index];
+
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: CardImage(
+                title: video.user.nome,
+                image: video.image,
+                onPressCard: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HomeVideoPlayer(
+                        video: video,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,33 +176,43 @@ class _ListVideosState extends State<ListVideos> {
         title: const Text('Videos Adicionados'),
       ),
       body: Container(
-        decoration: BoxDecoration(color: Colors.deepPurple[100]),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(8.0),
-          itemCount: listagemVideos.length,
-          itemBuilder: (context, index) {
-            Video video = listagemVideos[index];
-
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: CardImage(
-                  title: video.user.nome,
-                  image: video.image,
-                  onPressCard: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeVideoPlayer(
-                          video: video,
-                        ),
-                      ),
-                    );
-                  },
+        decoration: BoxDecoration(
+          color: Colors.deepPurple[100],
+        ),
+        child: !_isLoading
+            ? LazyLoadScrollView(
+                scrollDirection: Axis.vertical,
+                isLoading: _lazyLoading,
+                onEndOfPage: () => getVideos(lazy: true),
+                child: buildList())
+            : const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.deepPurple,
                 ),
               ),
-            );
-          },
+      ),
+      floatingActionButton: AnimatedSlide(
+        duration: const Duration(milliseconds: 300),
+        offset: _showFab ? Offset.zero : const Offset(0, 2),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: _showFab ? 1 : 0,
+          child: FloatingActionButton(
+              tooltip: 'Ir para o topo',
+              onPressed: () {
+                _scrollController.animateTo(0,
+                    duration: const Duration(milliseconds: 1000),
+                    curve: Curves.ease);
+                setState(() {
+                  Timer(
+                    const Duration(seconds: 1),
+                    () => setState(() {
+                      _showFab = false;
+                    }),
+                  );
+                });
+              },
+              child: const Icon(Icons.arrow_upward_rounded)),
         ),
       ),
     );

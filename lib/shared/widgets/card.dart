@@ -74,7 +74,7 @@ class CardImage extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.deepPurple,
+          color: const Color.fromARGB(255, 175, 157, 207),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ClipRRect(
