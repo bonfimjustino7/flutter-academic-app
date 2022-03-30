@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:academic_app/constants/form.dart';
 import 'package:academic_app/models/atividade.dart';
 import 'package:academic_app/screens/atividade_screen.dart';
 import 'package:academic_app/screens/form_atividade.dart';
@@ -17,7 +18,6 @@ class ListagemAtividades extends StatefulWidget {
 class _ListagemAtividadesState extends State<ListagemAtividades> {
   List<Atividade> listagemVideos = [];
   bool _isLoading = false;
-  final int _totalResults = 0;
 
   Future fetchAtividade() async {
     var response = await AtividadeService.list();
@@ -27,6 +27,7 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
   void getAtividades() async {
     setState(() {
       _isLoading = true;
+      listagemVideos = [];
     });
 
     Map? atividades = await fetchAtividade();
@@ -35,14 +36,11 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
         Atividade atividade = Atividade.fromJson(value);
         setState(() {
           listagemVideos.add(atividade);
-        });
-      });
-
-      setState(() {
-        listagemVideos.sort((a, b) {
-          var d1 = DateTime.parse(a.dataCriacao);
-          var d2 = DateTime.parse(b.dataCriacao);
-          return d2.compareTo(d1);
+          listagemVideos.sort((a, b) {
+            var d1 = DateTime.parse(a.dataCriacao);
+            var d2 = DateTime.parse(b.dataCriacao);
+            return d2.compareTo(d1);
+          });
         });
       });
     }
@@ -77,7 +75,8 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
                   child: CardAtividade(
                     titulo: atividade.titulo,
                     dataCriacao: atividade.dataCriacao,
-                    descricao: atividade.descricao.substring(0, 100),
+                    descricao: atividade.descricao
+                        .substring(0, FormConstants.minDescricao),
                   ),
                 ),
               );

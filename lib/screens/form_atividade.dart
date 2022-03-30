@@ -1,3 +1,4 @@
+import 'package:academic_app/constants/form.dart';
 import 'package:academic_app/models/atividade.dart';
 import 'package:academic_app/services/firebase.dart';
 import 'package:academic_app/shared/widgets/custom_text_field.dart';
@@ -66,7 +67,8 @@ class _FormAtividadeState extends State<FormAtividade> {
                         ),
                         CustomTextField(
                           validator: (text) {
-                            if (text != null && text.length < 100) {
+                            if (text != null &&
+                                text.length < FormConstants.minDescricao) {
                               return 'Digite no mínimo 100 caracteres';
                             }
                             return null;

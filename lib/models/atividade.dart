@@ -15,7 +15,7 @@ class Atividade {
     return Atividade(
         titulo: json['titulo'],
         descricao: json['descricao'],
-        dataCriacao: json['data_cricao']);
+        dataCriacao: json['data_criacao']);
   }
 }
 
@@ -46,7 +46,7 @@ class AtividadeModel {
     return {
       'titulo': titulo,
       'descricao': descricao,
-      'data_cricao': dataCriacao,
+      'data_criacao': dataCriacao,
     };
   }
 }
