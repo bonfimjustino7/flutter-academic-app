@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:academic_app/models/atividade.dart';
 import 'package:academic_app/screens/form_atividade.dart';
 import 'package:academic_app/services/firebase.dart';
+import 'package:academic_app/shared/widgets/card_atividade.dart';
 import 'package:flutter/material.dart';
 
 class ListagemAtividades extends StatefulWidget {
@@ -60,12 +61,12 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
 
         return Center(
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: ListTile(
-              title: Text(atividade.titulo),
-              subtitle: Text(atividade.dataCriacao),
-            ),
-          ),
+              padding: const EdgeInsets.all(10.0),
+              child: CardAtividade(
+                titulo: atividade.titulo,
+                dataCriacao: atividade.dataCriacao,
+                descricao: atividade.descricao,
+              )),
         );
       },
     );
