@@ -13,6 +13,7 @@ class FormAtividade extends StatefulWidget {
 
 class _FormAtividadeState extends State<FormAtividade> {
   TextEditingController intialdateval = TextEditingController();
+  DateTime? picked;
   final _form = GlobalKey<FormState>();
 
   var atividade = const AtividadeModel();
@@ -21,7 +22,7 @@ class _FormAtividadeState extends State<FormAtividade> {
   @override
   Widget build(BuildContext context) {
     Future _selectDate() async {
-      DateTime? picked = await showDatePicker(
+      picked = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
         firstDate: DateTime(2022),
@@ -32,7 +33,7 @@ class _FormAtividadeState extends State<FormAtividade> {
 
       if (picked != null) {
         setState(() {
-          final String formatted = formatter.format(picked);
+          final String formatted = formatter.format(picked!);
           intialdateval.text = formatted;
         });
       }
@@ -55,6 +56,7 @@ class _FormAtividadeState extends State<FormAtividade> {
                     child: Column(
                       children: [
                         CustomTextField(
+                            validator: (text) => null,
                             labelText: 'Título',
                             hintText: 'Título',
                             onSaved: (text) =>
@@ -63,6 +65,12 @@ class _FormAtividadeState extends State<FormAtividade> {
                           height: 15,
                         ),
                         CustomTextField(
+                          validator: (text) {
+                            if (text != null && text.length < 100) {
+                              return 'Digite no mínimo 100 caracteres';
+                            }
+                            return null;
+                          },
                           labelText: 'Descrição',
                           hintText: 'Descrição',
                           maxLines: 4,
@@ -74,8 +82,18 @@ class _FormAtividadeState extends State<FormAtividade> {
                           height: 15,
                         ),
                         TextFormField(
-                          onSaved: (text) =>
-                              atividade = atividade.copyWith(dataCriacao: text),
+                          onSaved: (text) {
+                            final DateFormat formatter =
+                                DateFormat('yyyy-MM-dd');
+
+                            if (picked != null) {
+                              final String formatted =
+                                  formatter.format(picked!);
+
+                              atividade =
+                                  atividade.copyWith(dataCriacao: formatted);
+                            }
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Data inválida';
@@ -148,6 +166,10 @@ class _FormAtividadeState extends State<FormAtividade> {
     });
     try {
       await AtividadeService.save(data);
+      Navigator.pop(context);
+      setState(() {
+        _loadingButton = false;
+      });
     } catch (e) {
       setState(() {
         _loadingButton = false;

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:academic_app/models/atividade.dart';
+import 'package:academic_app/screens/atividade_screen.dart';
 import 'package:academic_app/screens/form_atividade.dart';
 import 'package:academic_app/services/firebase.dart';
 import 'package:academic_app/shared/widgets/card_atividade.dart';
@@ -28,48 +29,60 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
       _isLoading = true;
     });
 
-    Map atividades = await fetchAtividade();
-
-    atividades.forEach((key, value) {
-      Atividade atividade = Atividade.fromJson(value);
-      setState(() {
-        listagemVideos.add(atividade);
+    Map? atividades = await fetchAtividade();
+    if (atividades != null) {
+      atividades.forEach((key, value) {
+        Atividade atividade = Atividade.fromJson(value);
+        setState(() {
+          listagemVideos.add(atividade);
+        });
       });
-    });
+
+      setState(() {
+        listagemVideos.sort((a, b) {
+          var d1 = DateTime.parse(a.dataCriacao);
+          var d2 = DateTime.parse(b.dataCriacao);
+          return d2.compareTo(d1);
+        });
+      });
+    }
     setState(() {
       _isLoading = false;
     });
   }
 
   Widget buildList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(8.0),
-      itemCount: listagemVideos.length,
-      itemBuilder: (context, index) {
-        Atividade atividade = listagemVideos[index];
+    return listagemVideos.isEmpty
+        ? const Center(
+            child: Text('Nenhum tarefa encontrada'),
+          )
+        : ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            itemCount: listagemVideos.length,
+            itemBuilder: (context, index) {
+              Atividade atividade = listagemVideos[index];
 
-        if (index == listagemVideos.length - 1 &&
-            _totalResults > listagemVideos.length) {
-          return const Center(
-            child: SizedBox(
-              width: 30,
-              height: 30,
-              child: CircularProgressIndicator(),
-            ),
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AtividadeScreen(atividade: atividade),
+                      ),
+                    );
+                  },
+                  child: CardAtividade(
+                    titulo: atividade.titulo,
+                    dataCriacao: atividade.dataCriacao,
+                    descricao: atividade.descricao.substring(0, 100),
+                  ),
+                ),
+              );
+            },
           );
-        }
-
-        return Center(
-          child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: CardAtividade(
-                titulo: atividade.titulo,
-                dataCriacao: atividade.dataCriacao,
-                descricao: atividade.descricao,
-              )),
-        );
-      },
-    );
   }
 
   @override

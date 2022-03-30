@@ -5,6 +5,7 @@ class CustomTextField extends StatelessWidget {
     Key? key,
     this.keyboardType,
     this.maxLines,
+    required this.validator,
     required this.labelText,
     required this.hintText,
     required this.onSaved,
@@ -15,6 +16,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLines;
 
+  final String? Function(String? text) validator;
   final void Function(String? text) onSaved;
 
   @override
@@ -24,7 +26,7 @@ class CustomTextField extends StatelessWidget {
         if (text == null || text.isEmpty) {
           return 'Esse campo não pode ser nulo';
         }
-        return null;
+        return validator(text);
       },
       onSaved: onSaved,
       maxLines: maxLines ?? 1,

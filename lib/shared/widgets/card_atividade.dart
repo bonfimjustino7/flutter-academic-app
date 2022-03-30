@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CardAtividade extends StatelessWidget {
   final String titulo;
@@ -14,6 +15,12 @@ class CardAtividade extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime dateCreated = DateTime.parse(dataCriacao);
+
+    DateFormat format = DateFormat('dd/MM/yyyy');
+
+    String dateFormatted = format.format(dateCreated);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(
@@ -22,7 +29,7 @@ class CardAtividade extends StatelessWidget {
         border: Border.all(color: Colors.grey, width: 1.0),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +54,7 @@ class CardAtividade extends StatelessWidget {
                           fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      dataCriacao,
+                      dateFormatted,
                       style: const TextStyle(fontSize: 10),
                     )
                   ],
@@ -59,7 +66,7 @@ class CardAtividade extends StatelessWidget {
             ),
             Text(
               descricao,
-              style: const TextStyle(fontSize: 13, color: Colors.black),
+              style: const TextStyle(fontSize: 13, height: 1.5),
             ),
           ],
         ),
