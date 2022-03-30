@@ -69,7 +69,7 @@ class _FormAtividadeState extends State<FormAtividade> {
                           validator: (text) {
                             if (text != null &&
                                 text.length < FormConstants.minDescricao) {
-                              return 'Digite no mínimo 100 caracteres';
+                              return 'Digite no mínimo ${FormConstants.minDescricao} caracteres';
                             }
                             return null;
                           },
