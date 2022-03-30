@@ -1,4 +1,5 @@
-import 'package:academic_app/screens/list_videos.dart';
+import 'package:academic_app/screens/main_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      home: const ListVideos(),
+      home: const MainPage(),
     );
   }
 }

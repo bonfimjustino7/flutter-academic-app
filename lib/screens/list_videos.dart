@@ -184,7 +184,7 @@ class _ListVideosState extends State<ListVideos> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          color: Colors.deepPurple[100],
+          color: Colors.deepPurple[50],
         ),
         child: !_isLoading
             ? buildList()
