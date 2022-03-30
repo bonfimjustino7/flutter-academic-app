@@ -16,7 +16,7 @@ class ListagemAtividades extends StatefulWidget {
 }
 
 class _ListagemAtividadesState extends State<ListagemAtividades> {
-  List<Atividade> listagemVideos = [];
+  List<Atividade> listagemAtividades = [];
   bool _isLoading = false;
 
   Future fetchAtividade() async {
@@ -27,7 +27,7 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
   void getAtividades() async {
     setState(() {
       _isLoading = true;
-      listagemVideos = [];
+      listagemAtividades = [];
     });
 
     Map? atividades = await fetchAtividade();
@@ -35,8 +35,8 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
       atividades.forEach((key, value) {
         Atividade atividade = Atividade.fromJson(value);
         setState(() {
-          listagemVideos.add(atividade);
-          listagemVideos.sort((a, b) {
+          listagemAtividades.add(atividade);
+          listagemAtividades.sort((a, b) {
             var d1 = DateTime.parse(a.dataCriacao);
             var d2 = DateTime.parse(b.dataCriacao);
             return d2.compareTo(d1);
@@ -50,15 +50,15 @@ class _ListagemAtividadesState extends State<ListagemAtividades> {
   }
 
   Widget buildList() {
-    return listagemVideos.isEmpty
+    return listagemAtividades.isEmpty
         ? const Center(
             child: Text('Nenhum tarefa encontrada'),
           )
         : ListView.builder(
             padding: const EdgeInsets.all(8.0),
-            itemCount: listagemVideos.length,
+            itemCount: listagemAtividades.length,
             itemBuilder: (context, index) {
-              Atividade atividade = listagemVideos[index];
+              Atividade atividade = listagemAtividades[index];
 
               return Padding(
                 padding: const EdgeInsets.all(10.0),
